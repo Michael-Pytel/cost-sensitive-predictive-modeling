@@ -1,0 +1,1 @@
+{"best_k": 5, "feats": [175, 32, 390, 345, 224], "optimal_N": 1000, "optimal_threshold": 0.5716, "score_at_optimal": 3885, "score_at_third": 3885, "threshold_gap": 0, "test_frac_gt_third": 0.9634, "test_frac_gt_half": 0.4842}
