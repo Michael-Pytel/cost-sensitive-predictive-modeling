@@ -22,9 +22,9 @@ class ModelGenerator:
         self.param_grids = {
             'rf': {
                 'n_estimators': stats.randint(50, 500),
-                'max_depth': [None] + list(range(3, 15)),
+                'max_depth': list(range(4, 12)),
+                'min_samples_leaf': stats.randint(1, 5),
                 'min_samples_split': stats.randint(2, 10),
-                'min_samples_leaf': stats.randint(1, 10),
                 'criterion': ['gini', 'entropy'],
                 'class_weight': ['balanced', None],
             },
@@ -37,8 +37,8 @@ class ModelGenerator:
                 'class_weight': ['balanced', None],
             },
             'xgb': {
-                'n_estimators': stats.randint(50, 500),
-                'learning_rate': stats.uniform(0.01, 0.3),
+                'n_estimators': stats.randint(100, 400),
+                'learning_rate': stats.uniform(0.03, 0.15),
                 'max_depth': stats.randint(3, 10),
                 'subsample': stats.uniform(0.5, 0.5),
                 'colsample_bytree': stats.uniform(0.5, 0.5),
@@ -47,15 +47,13 @@ class ModelGenerator:
                 'reg_lambda': stats.uniform(0.5, 2),
             },
             'lgbm': {
-                'n_estimators': stats.randint(50, 500),
-                'learning_rate': stats.uniform(0.01, 0.3),
+                'n_estimators': stats.randint(100, 400),
+                'learning_rate': stats.uniform(0.03, 0.15),
                 'num_leaves': stats.randint(20, 100),
-                'min_child_samples': stats.randint(10, 100),
+                'min_child_samples': stats.randint(10, 50),
                 'colsample_bytree': stats.uniform(0.5, 0.5),
                 'reg_alpha': stats.uniform(0, 1),
                 'reg_lambda': stats.uniform(0.5, 2),
-                'boosting_type': ['gbdt', 'dart'],
-                'class_weight': ['balanced', None],
             },
         }
 
