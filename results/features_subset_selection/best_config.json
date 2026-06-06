@@ -1,0 +1,24 @@
+{
+  "score": 5685,
+  "k": 6,
+  "features": [
+    "V176",
+    "V255",
+    "V191",
+    "V160",
+    "V380",
+    "V342"
+  ],
+  "N": 999,
+  "tp": 792,
+  "fp": 207,
+  "stage": 2,
+  "hp": {
+    "n_estimators": 214,
+    "max_depth": 12,
+    "min_samples_split": 9,
+    "min_samples_leaf": 8,
+    "criterion": "gini",
+    "class_weight": "balanced"
+  }
+}

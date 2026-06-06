@@ -1,0 +1,6 @@
+score,k,N,thr,tp,fp,features,hp
+5685,6,999,0.5598798393645854,792,207,"['V176', 'V255', 'V191', 'V160', 'V380', 'V342']","{'n_estimators': 214, 'max_depth': 12, 'min_samples_split': 9, 'min_samples_leaf': 8, 'criterion': 'gini', 'class_weight': 'balanced'}"
+5630,5,999,0.5402646610927067,775,224,"['V255', 'V191', 'V215', 'V380', 'V342']","{'n_estimators': 234, 'max_depth': 6, 'min_samples_split': 6, 'min_samples_leaf': 1, 'criterion': 'entropy', 'class_weight': 'balanced'}"
+5575,6,1000,0.5342710504412215,785,215,"['V255', 'V191', 'V160', 'V215', 'V380', 'V342']","{'n_estimators': 461, 'max_depth': 6, 'min_samples_split': 2, 'min_samples_leaf': 1, 'criterion': 'gini', 'class_weight': None}"
+5575,7,999,0.555450796660537,798,201,"['V176', 'V255', 'V191', 'V160', 'V215', 'V380', 'V342']","{'n_estimators': 352, 'max_depth': 9, 'min_samples_split': 10, 'min_samples_leaf': 1, 'criterion': 'gini', 'class_weight': 'balanced'}"
+5565,5,1000,0.529462096553089,771,229,"['V255', 'V191', 'V160', 'V215', 'V380']","{'n_estimators': 514, 'max_depth': 5, 'min_samples_split': 4, 'min_samples_leaf': 3, 'criterion': 'gini', 'class_weight': None}"

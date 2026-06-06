@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 
-def load_data(source = 'scaled_original'):
+def load_data(source = 'original'):
     """Load train/test arrays and return scaled versions plus the fitted scaler.
     
     Args:
@@ -26,8 +26,8 @@ def load_data(source = 'scaled_original'):
         return X_train, y_train, X_test, X_train_s, X_test_s, scaler
     
     elif source == 'scaled_reduced_mi':
-        X_train = pd.read_csv(DATA_DIR / "x_train_scaled_reduced_after_mi.csv")
-        y_train = pd.read_csv(DATA_DIR / "y_train.csv", skiprows=1).astype(int)
-        X_test = pd.read_csv(DATA_DIR / "x_test_scaled_reduced_after_mi.csv")
+        X_train = pd.read_csv(DATA_DIR / "processed" /"x_train_scaled_reduced_after_mi.csv")
+        y_train = np.loadtxt(DATA_DIR / "y_train.txt", skiprows=1).astype(int)
+        X_test = pd.read_csv(DATA_DIR / "processed" / "x_test_scaled_reduced_after_mi.csv")
 
         return X_train, y_train, X_test, None, None, None
