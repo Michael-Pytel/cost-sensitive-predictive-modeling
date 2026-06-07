@@ -1,3 +1,5 @@
+"""Compute pairwise mutual information for all feature pairs (parallelized)."""
+
 import sys
 import os
 

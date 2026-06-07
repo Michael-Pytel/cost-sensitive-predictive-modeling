@@ -1,0 +1,36 @@
+{
+  "team_ids": "1_2_3",
+  "model": "ExtraTreesClassifier",
+  "features": [
+    "V176",
+    "V255",
+    "V191",
+    "V160",
+    "V380",
+    "V342"
+  ],
+  "feature_indices_1indexed": [
+    160,
+    176,
+    191,
+    255,
+    342,
+    380
+  ],
+  "k": 6,
+  "hyperparameters": {
+    "n_estimators": 214,
+    "max_depth": 12,
+    "min_samples_split": 9,
+    "min_samples_leaf": 8,
+    "criterion": "gini",
+    "class_weight": "balanced"
+  },
+  "oof_score": 5685,
+  "oof_N": 999,
+  "oof_tp": 792,
+  "oof_fp": 207,
+  "oof_threshold": 0.5599,
+  "n_test_contacted": 999,
+  "random_state": 0
+}

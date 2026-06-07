@@ -86,7 +86,7 @@ def load_ranking(name: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 def load_train() -> tuple[pd.DataFrame, np.ndarray, list[str]]:
-    X = pd.read_csv(DATA_DIR / "x_train_scaled_reduced_after_mi.csv")
+    X = pd.read_csv(DATA_DIR / "processed" / "x_train_scaled_reduced_after_mi.csv")
     y = np.loadtxt(DATA_DIR / "y_train.txt", skiprows=1).astype(int)
     return X, y, X.columns.tolist()
 

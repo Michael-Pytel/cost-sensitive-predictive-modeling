@@ -1,3 +1,5 @@
+"""Random hyperparameter sampling for tree-based classifiers."""
+
 import random
 import numpy as np
 from scipy import stats

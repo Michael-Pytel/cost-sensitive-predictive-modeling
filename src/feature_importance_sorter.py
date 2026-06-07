@@ -1,3 +1,5 @@
+"""Feature importance ranking via repeated cross-validated tree models."""
+
 import numpy as np
 import pandas as pd
 from model_generator import ModelGenerator
