@@ -15,6 +15,7 @@ from joblib import Parallel, delayed
 _, y_train, _, X_train, _, _ = load_data()
 
 def compute_mi(pair, X):
+    """Compute mutual information for a given feature pair."""
     i, j = pair
     mi_score = mutual_info_regression(X[:, [i]], X[:, j])[0]
     print(f"Feature {i=}, {j=} {mi_score=}")
