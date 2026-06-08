@@ -16,87 +16,132 @@ Each correctly targeted customer earns €10, each false positive costs €5, an
 
 ## Results
 
-| Configuration | K | Score (OOF) | TP | FP | N | Precision |
+| Configuration | K | Score (OOF mean ± σ) | TP | FP | N | Precision |
 |---|---|---|---|---|---|---|
 | LR-L1 baseline | 5 | 3,885 | 659 | 341 | 1000 | 65.9% |
-| **ExtraTrees (final)** | **6** | **5,685** | **792** | **207** | **999** | **79.3%** |
+| ET Random Search | 7 | 5,665 | 804 | 195 | 999 | 80.5% |
+| ET Optuna k=6 | 6 | 5,593 ± 19 | 785 | 213 | 998 | 78.7% |
+| **SVM-RBF Optuna k=5** | **5** | **5,638 ± 38** | **772** | **227** | **999** | **77.3%** |
 
-The final model achieves a **46% improvement** over the logistic regression baseline.
+Scores are means over CV seeds {0, 1, 2}; TP/FP/N reported at seed 0.
+The final SVM-RBF model achieves a **45% improvement** over the LR baseline.
 
-**Final features**: V176, V255, V191, V160, V380, V342  
-**Expected test score**: ~5,400–5,600 (based on multi-seed stability analysis, mean = 5,522 ± 105)
+**Final features**: V255, V191, V160, V380, V342  
+**Expected test score**: ~5,638 ± 38
 
 ## Project Structure
 
 ```
-├── data/                         # Raw and processed datasets
-│   ├── x_train.txt               # 5000×500 training features
-│   ├── y_train.txt               # Binary labels
-│   ├── x_test.txt                # 5000×500 test features
-│   └── processed/                # MI-reduced datasets (493 features)
+├── data/
+│   ├── x_train.txt                              # 5000×500 training features
+│   ├── y_train.txt                              # Binary labels
+│   ├── x_test.txt                               # 5000×500 test features
+│   └── processed/                               # MI-reduced datasets (493 features)
 │
-├── src/                          # Reusable modules
-│   ├── data.py                   # Data loading and scaling
-│   ├── scoring.py                # Competition scoring (sweep_cutoff, n_vars_used)
-│   ├── features.py               # Feature ranking (L1 path, MI, covariate shift)
-│   ├── models.py                 # Model factory (LR, RF, GBM, LGBM, XGB)
-│   ├── cv.py                     # Competition-aware CV evaluation
-│   ├── model_generator.py        # Random hyperparameter sampling for trees
-│   └── feature_importance_sorter.py  # CV-based feature importance aggregation
+├── src/
+│   ├── data.py                                  # Data loading and scaling
+│   ├── scoring.py                               # sweep_cutoff, n_vars_used
+│   ├── features.py                              # Feature ranking (L1 path, MI, shift)
+│   ├── models.py                                # Model factory
+│   ├── cv.py                                    # Competition-aware CV evaluation
+│   ├── model_generator.py                       # Random HP sampling for trees
+│   └── feature_importance_sorter.py             # CV-based importance aggregation
 │
-├── notebooks/                    # Analysis notebooks (run in order)
-│   ├── 01_eda.ipynb              # EDA: distributions, shift, separability, calibration
-│   ├── 02_first_models.ipynb     # Baseline models comparison (LR, RF, GBM, etc.)
-│   ├── 03_mi_analysis.ipynb      # Pairwise MI → redundant feature removal (500→493)
-│   ├── 04_trees_feature_importance.ipynb  # 800 random configs → aggregated rankings
-│   ├── 05_exhaustive_search.ipynb # All 120 subsets × Optuna fine-tuning
-│   └── 06_stability_blend.ipynb  # Multi-seed stability, blending, V224 ablation
+├── notebooks/
+│   ├── 01_eda.ipynb                             # EDA, covariate shift, calibration
+│   ├── 02_first_models.ipynb                    # Baseline model comparison
+│   ├── 03_mi_analysis.ipynb                     # Pairwise MI → 500→493 features
+│   ├── 04_trees_feature_importance.ipynb        # 800 random configs → 7 candidates
+│   ├── 05_exhaustive_search.ipynb               # 120 subsets × Optuna (ExtraTrees)
+│   ├── 06_stability_blend.ipynb                 # Multi-seed stability, V224 ablation
+│   ├── 07_model_comparison.ipynb                # 15-family benchmark on final features
+│   └── 08_svm_subset_search.ipynb               # 120 subsets × Optuna (SVM-RBF)
+│
+├── notebooks/figures/                           # Figures included in the report
 │
 ├── scripts/
-│   ├── first_diagnostics.py      # Original LR-L1 baseline diagnostics
-│   ├── diagnostics_trees.py      # Tree random search over rankings
-│   └── pairwise_mutual_information_calculation.py  # All-pairs MI computation
+│   ├── first_diagnostics.py
+│   ├── diagnostics_trees.py
+│   └── pairwise_mutual_information_calculation.py
 │
-├── submission.py                 # ★ Final model → submission files
-├── report.pdf                    # LaTeX report (5 pages)
+├── best_config.json                             # ET Optuna winner (k=6)
+├── svm_best_config.json                         # SVM Optuna winner (k=5) ← final
+├── submission.py                                # ★ Final model → submission files
+├── requirements.txt                             # Python dependencies
+├── report.pdf                                   # LaTeX report (5 pages)
 └── README.md
 ```
 
 ## Pipeline
 
-The modeling pipeline proceeds in six stages:
+1. **EDA** (`01_eda.ipynb`): Verified near-50/50 label balance and — critically —
+   **no covariate shift** between train and test (discriminator AUC ≈ 0.50, KS stats
+   uniformly small). This confirmed that OOF scores transfer reliably to the test set.
 
-1. **EDA** (`01_eda.ipynb`): Verified near-50/50 label balance and — critically — **no covariate shift** between train and test (discriminator AUC ≈ 0.50, KS stats uniformly small). This confirmed that OOF scores transfer reliably to the test set.
+2. **Baseline models** (`02_first_models.ipynb`): Compared LR-L1, LR-L2, RF, GBM,
+   LightGBM, XGBoost with competition-aware CV. LR-L1 with 5 features scored 3,885.
 
-2. **Baseline models** (`02_first_models.ipynb`): Compared LR-L1, LR-L2, RF, GBM, LightGBM, XGBoost using competition-aware CV. LR-L1 with 5 features scored 3,885. Tree models used too many features implicitly.
+3. **Mutual information filtering** (`03_mi_analysis.ipynb`): Computed pairwise MI for
+   all 124,750 feature pairs. Removed 7 near-duplicate features (MI > 1.0), yielding
+   493 features.
 
-3. **Mutual information filtering** (`03_mi_analysis.ipynb`): Computed pairwise MI for all 124,750 feature pairs. Removed 7 redundant features (MI > 1.0 with another feature), yielding 493 features.
+4. **Tree feature importance** (`04_trees_feature_importance.ipynb`): Ran 200 random HP
+   configs × 4 model families (RF, ExtraTrees, XGBoost, LightGBM). Aggregated
+   importances identified 7 dominant candidates: V176, V255, V191, V160, V215, V380,
+   V342.
 
-4. **Tree feature importance** (`04_trees_feature_importance.ipynb`): Ran 200 random hyperparameter configs × 4 model families (RF, ExtraTrees, XGBoost, LightGBM). Aggregated importances identified 7 dominant candidates: V176, V255, V191, V160, V215, V380, V342.
+5. **ExtraTrees exhaustive search + Optuna** (`05_exhaustive_search.ipynb`): Evaluated
+   all 120 subsets (k=2..7) of the 7 candidates, multi-seed (seeds {0,1,2}). Optuna
+   (80 trials, TPE) fine-tuned HP on the top 8 subsets. Best ET result: k=6
+   {V176, V255, V191, V160, V380, V342}, mean score = 5,593 ± 19.
 
-5. **Exhaustive subset search** (`05_exhaustive_search.ipynb`): Evaluated all 120 subsets of size k=2..7 from the 7 candidates, each with 4 strong HP configs. Then Optuna fine-tuning (80 trials) on the top 5 subsets. Best: k=6 (V176, V255, V191, V160, V380, V342), score = 5,685.
+6. **Stability and ablation** (`06_stability_blend.ipynb`): Multi-seed stability check
+   on held-out seeds {42, 123, 7, 17, 99}. V224 ablation confirmed it carries no
+   complementary signal.
 
-6. **Stability and ablation** (`06_stability_blend.ipynb`): Validated with 5 CV seeds (mean 5,522 ± 105). Blending multiple HPs did not improve over the single best. Adding V224 (LR top feature) degraded score — confirmed it carries no complementary signal for trees.
+7. **Estimator family benchmark** (`07_model_comparison.ipynb`): Benchmarked 15
+   classifiers on the ET-optimal 6-feature set (multi-seed, mean ± σ). Clear linear
+   ceiling (~3,830); all nonlinear models exceed 4,800. SVM-RBF (untuned) reached
+   5,477 ± 31 — close to tuned ET — motivating dedicated SVM tuning.
+
+8. **SVM-RBF exhaustive search + Optuna** (`08_svm_subset_search.ipynb`): Applied the
+   same pipeline to SVM-RBF using `decision_function` for speed (~5× faster than
+   Platt scaling). Best subset: k=5 {V255, V191, V160, V380, V342} (drops V176),
+   mean score = **5,638 ± 38** — selected as the final submission model.
 
 ## Generating the Submission
 
 ```bash
+pip install -r requirements.txt
 python submission.py --ids STUDENT1ID_STUDENT2ID_STUDENT3ID --data-dir data/
 ```
 
 This will:
-1. Run OOF sanity check on training data (expected score ≈ 5,685)
-2. Train the final ExtraTrees model on all 5,000 training samples
-3. Generate `<IDs>_obs.txt` (customer indices) and `<IDs>_vars.txt` (feature indices)
+1. Run OOF sanity check on training data using `decision_function` (expected ≈ 5,638)
+2. Train the final SVM-RBF model on all 5,000 training samples
+3. Generate `<IDs>_obs.txt` (999 customer indices) and `<IDs>_vars.txt` (feature indices)
 
-## Requirements
-
-- Python 3.10+
-- numpy, pandas, scikit-learn, scipy, matplotlib, seaborn
-- xgboost, lightgbm, optuna (for notebooks 04–05)
+HP are loaded automatically from `svm_best_config.json` if present in the working
+directory; hardcoded fallback values are used otherwise.
 
 ## Key Design Decisions
 
-- **Feature cost drives everything**: At €200 per feature, a feature must improve precision by ≥1.33pp at N=1000 to pay for itself. This ruled out the 7th feature (V215).
-- **Exhaustive > nested search**: The standard top-k prefix selection explored <10% of subsets within the candidate pool. Exhaustive enumeration found a non-nested k=6 subset that beats the nested k=7 best.
-- **No domain adaptation needed**: Identical train/test distributions meant OOF-calibrated thresholds transfer directly — no need for conservative adjustments.
+- **Feature cost drives everything**: At €200 per feature, a feature must improve
+  precision by ≥1.33 pp at N=1000 to pay for itself. SVM wins over ET (k=6) because
+  it achieves comparable performance with one fewer feature — the €200 saving outweighs
+  the 13-TP deficit (130 < 200).
+
+- **Exhaustive > nested search**: Standard top-k prefix selection explores <6% of
+  subsets within the candidate pool. Exhaustive enumeration over all 120 subsets found
+  non-prefix solutions for both ET and SVM.
+
+- **Multi-seed objective prevents split overfitting**: All Optuna searches optimise the
+  mean OOF score across CV seeds {0,1,2} rather than a single split. This avoids
+  selecting HP configurations that exploit a favourable fold.
+
+- **No domain adaptation needed**: Identical train/test distributions (no covariate
+  shift) mean OOF-calibrated rankings transfer directly to the test set.
+
+- **SVM drops the top tree feature**: V176 (aggregate tree rank 1) is absent from
+  SVM's optimal set. The RBF kernel captures the underlying signal structure
+  differently from impurity-based splits.
