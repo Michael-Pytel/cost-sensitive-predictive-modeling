@@ -1,0 +1,35 @@
+{
+  "selection_seeds": [
+    0,
+    1,
+    2
+  ],
+  "mean_score": 5593.333333333333,
+  "std_score": 19.293061504650375,
+  "per_seed": [
+    5585,
+    5620,
+    5575
+  ],
+  "seed0_score": 5585,
+  "k": 6,
+  "features": [
+    "V176",
+    "V255",
+    "V191",
+    "V160",
+    "V380",
+    "V342"
+  ],
+  "N": 998,
+  "tp": 785,
+  "fp": 213,
+  "hp": {
+    "n_estimators": 526,
+    "max_depth": 10,
+    "min_samples_split": 6,
+    "min_samples_leaf": 6,
+    "criterion": "gini",
+    "class_weight": null
+  }
+}
