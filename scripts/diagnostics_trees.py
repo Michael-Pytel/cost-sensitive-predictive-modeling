@@ -29,6 +29,10 @@ RANKING_CHOICES = ("ranking_total", "ranking_rf", "ranking_extra", "ranking_lgbm
 # ---------------------------------------------------------------------------
 
 def _load_model_ranking(model_type: str) -> pd.DataFrame:
+    """
+    Load the feature importance ranking for a given model type.
+    Can be one of the following: ranking_total, ranking_rf, ranking_extra, ranking_lgbm, ranking_xgb.
+    """
     path = (
         DATA_DIR
         / f"{model_type}_feature_importance"
@@ -86,6 +90,9 @@ def load_ranking(name: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 def load_train() -> tuple[pd.DataFrame, np.ndarray, list[str]]:
+    """
+    Load the train data, after mutual information reduction and scaling.
+    """
     X = pd.read_csv(DATA_DIR / "processed" / "x_train_scaled_reduced_after_mi.csv")
     y = np.loadtxt(DATA_DIR / "y_train.txt", skiprows=1).astype(int)
     return X, y, X.columns.tolist()
@@ -96,6 +103,9 @@ def load_train() -> tuple[pd.DataFrame, np.ndarray, list[str]]:
 # ---------------------------------------------------------------------------
 
 def build_model(model_type: str, params: dict, random_seed: int):
+    """
+    Build a model of a given type with given parameters and random seed.
+    """
     gen = ModelGenerator(config_type="random", random_seed=random_seed)
     cls = gen.model_map[model_type]
     if model_type == "xgb":
@@ -116,7 +126,7 @@ def diagnostics_evaluate(
     cap: int = 1000,
 ) -> dict:
     """
-    OOF proba on full train + one global sweep_cutoff (diagnostics_mp protocol).
+    OOF proba on full train + one global sweep_cutoff (first_diagnostics.py protocol).
     """
     skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=random_state)
     p_oof = cross_val_predict(
@@ -148,6 +158,9 @@ def search_best_k(
     cv: int = 5,
     random_state: int = 0,
 ) -> dict | None:
+    """
+    Search for the best k (number of features) for a given model, data, and ranking.
+    """
     best = None
     for k in range(k_min, k_max + 1):
         feats = ranking[:k]
@@ -185,6 +198,9 @@ RESULT_COLUMNS = [
 
 
 def append_trial(csv_path: Path, row: dict) -> None:
+    """
+    Append a trial to the results CSV file.
+    """
     df = pd.DataFrame([row], columns=RESULT_COLUMNS)
     header = not csv_path.exists()
     df.to_csv(csv_path, mode="a", header=header, index=False)
@@ -198,6 +214,9 @@ def run_random_search(
     random_seed: int = 0,
     cv: int = 5,
 ) -> Path:
+    """
+    Main function to run the random search loop.
+    """
     if model_type not in MODEL_TYPES:
         raise ValueError(f"model_type must be one of {MODEL_TYPES}")
 
@@ -268,6 +287,9 @@ def run_random_search(
 # ---------------------------------------------------------------------------
 
 def parse_args():
+    """
+    Parse command line arguments, such as model type, ranking, number of trials, etc.
+    """
     p = argparse.ArgumentParser(description="Tree random search with diagnostics OOF scoring")
     p.add_argument("--model-type", required=True, choices=MODEL_TYPES)
     p.add_argument("--ranking", required=True, choices=RANKING_CHOICES)
